@@ -220,7 +220,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-transport-native-unix-common</artifactId>
-            <version>4.1.68.Final</version>
+            <version>4.1.71.Final</version>
         </dependency>
         <dependency>
             <groupId>io.reactivex.rxjava2</groupId>
