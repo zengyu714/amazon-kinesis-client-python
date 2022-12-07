@@ -2,8 +2,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <properties>
-        <awssdk.version>2.17.100</awssdk.version>
-        <aws-java-sdk.version>1.12.3</aws-java-sdk.version>
+        <awssdk.version>2.18.29</awssdk.version>
+        <aws-java-sdk.version>1.12.356</aws-java-sdk.version>
         <netty.version>4.1.72.Final</netty.version>
         <fasterxml-jackson.version>2.13.1</fasterxml-jackson.version>
         <logback.version>1.2.10</logback.version>
@@ -11,7 +11,7 @@
     <dependencies>
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
-            <artifactId>kinesis</artifactId>
+            <artifactId>kinesis-private</artifactId>
             <version>${awssdk.version}</version>
         </dependency>
         <dependency>
@@ -38,6 +38,16 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>aws-core</artifactId>
             <version>${awssdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>endpoints-spi</artifactId>
+            <version>${awssdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.reactivex.rxjava3</groupId>
+            <artifactId>rxjava</artifactId>
+            <version>3.1.5</version>
         </dependency>
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
@@ -137,12 +147,12 @@
         <dependency>
             <groupId>software.amazon.kinesis</groupId>
             <artifactId>amazon-kinesis-client-multilang</artifactId>
-            <version>2.3.9</version>
+            <version>2.5.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>software.amazon.kinesis</groupId>
             <artifactId>amazon-kinesis-client</artifactId>
-            <version>2.3.9</version>
+            <version>2.5.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>

@@ -4,14 +4,18 @@ Copyright 2014-2015 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 SPDX-License-Identifier: Apache-2.0
 '''
 from __future__ import print_function
-import sys, random, time, argparse
-from boto import kinesis
 
-def get_stream_status(conn, stream_name):
+import argparse
+import sys
+import time
+
+import boto3
+
+def get_stream_status(kinesis, stream_name):
     '''
     Query this provided connection object for the provided stream's status.
 
-    :type conn: boto.kinesis.layer1.KinesisConnection
+    :type conn: Kinesis.Client
     :param conn: A connection to Amazon Kinesis
 
     :type stream_name: str
@@ -20,36 +24,36 @@ def get_stream_status(conn, stream_name):
     :rtype: str
     :return: The stream's status
     '''
-    r = conn.describe_stream(stream_name)
+    r = kinesis.describe_stream(StreamName=stream_name)
     description = r.get('StreamDescription')
     return description.get('StreamStatus')
 
-def wait_for_stream(conn, stream_name):
+def wait_for_stream(kinesis, stream_name):
     '''
     Wait for the provided stream to become active.
 
-    :type conn: boto.kinesis.layer1.KinesisConnection
-    :param conn: A connection to Amazon Kinesis
+    :type kinesis: Kinesis.Client
+    :param kinesis: A low-level client representing Amazon Kinesis
 
     :type stream_name: str
     :param stream_name: The name of a stream.
     '''
     SLEEP_TIME_SECONDS = 3
-    status = get_stream_status(conn, stream_name)
+    status = get_stream_status(kinesis, stream_name)
     while status != 'ACTIVE':
         print('{stream_name} has status: {status}, sleeping for {secs} seconds'.format(
                 stream_name = stream_name,
                 status      = status,
                 secs        = SLEEP_TIME_SECONDS))
         time.sleep(SLEEP_TIME_SECONDS) # sleep for 3 seconds
-        status = get_stream_status(conn, stream_name)
+        status = get_stream_status(kinesis, stream_name)
 
-def put_words_in_stream(conn, stream_name, words):
+def put_words_in_stream(kinesis, stream_name, words):
     '''
     Put each word in the provided list of words into the stream.
 
-    :type conn: boto.kinesis.layer1.KinesisConnection
-    :param conn: A connection to Amazon Kinesis
+    :type kinesis: Kinesis.Client
+    :param kinesis: A connection to Amazon Kinesis
 
     :type stream_name: str
     :param stream_name: The name of a stream.
@@ -59,7 +63,7 @@ def put_words_in_stream(conn, stream_name, words):
     '''
     for w in words:
         try:
-            conn.put_record(stream_name, w, w)
+            kinesis.put_record(StreamName=stream_name, Data=w, PartitionKey=w)
             print("Put word: " + w + " into stream: " + stream_name)
         except Exception as e:
             sys.stderr.write("Encountered an exception while trying to put a word: "
@@ -115,18 +119,19 @@ echo "WORD1\\nWORD2\\nWORD3" | sample_wordputter.py -s STREAM_NAME -p 3
     one of the standard credentials providers.
     '''
     print("Connecting to stream: {s} in {r}".format(s=stream_name, r=args.region))
-    conn = kinesis.connect_to_region(region_name = args.region)
+    kinesis = boto3.client('kinesis', region_name=args.region)
+
     try:
-        status = get_stream_status(conn, stream_name)
+        status = get_stream_status(kinesis, stream_name)
         if 'DELETING' == status:
             print('The stream: {s} is being deleted, please rerun the script.'.format(s=stream_name))
             sys.exit(1)
         elif 'ACTIVE' != status:
-            wait_for_stream(conn, stream_name)
+            wait_for_stream(kinesis, stream_name)
     except:
         # We'll assume the stream didn't exist so we will try to create it with just one shard
-        conn.create_stream(stream_name, 1)
-        wait_for_stream(conn, stream_name)
+        kinesis.create_stream(StreamName=stream_name, ShardCount=1)
+        wait_for_stream(kinesis, stream_name)
     # Now the stream should exist
     if len(args.words) == 0:
         print('No -w options provided. Waiting on input from STDIN')
@@ -134,6 +139,6 @@ echo "WORD1\\nWORD2\\nWORD3" | sample_wordputter.py -s STREAM_NAME -p 3
     else:
         words = args.words
     if args.period != None:
-        put_words_in_stream_periodically(conn, stream_name, words, args.period)
+        put_words_in_stream_periodically(kinesis, stream_name, words, args.period)
     else:
-        put_words_in_stream(conn, stream_name, words)
+        put_words_in_stream(kinesis, stream_name, words)

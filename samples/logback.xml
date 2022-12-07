@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~  Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  ~
+  ~  Licensed under the Amazon Software License (the "License").
+  ~  You may not use this file except in compliance with the License.
+  ~  A copy of the License is located at
+  ~
+  ~  http://aws.amazon.com/asl/
+  ~
+  ~  or in the "license" file accompanying this file. This file is distributed
+  ~  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~  express or implied. See the License for the specific language governing
+  ~  permissions and limitations under the License.
+  -->
+
+<configuration>
+
+    <appender name="MAIN" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_BASE_NAME:-logs/UnknownApp}.log</file>
+        <!--<file>logs/Consumer.log</file>-->
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--daily rollover -->
+            <fileNamePattern>${LOG_BASE_NAME:-logs/UnknownApp}.%d{yyyy-MM-dd-HH}.log</fileNamePattern>
+            <!--<fileNamePattern>log/Consumer.%d{yyyy-MM-dd-HH}.log</fileNamePattern>-->
+
+            <!--keep 15 days' worth of history capped at 16GB total size -->
+            <maxHistory>15</maxHistory>
+            <totalSizeCap>16GB</totalSizeCap>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d [%thread] %-5level %logger{36} [%mdc{ShardId:-NONE}] - %msg %n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d [%thread] %-5level %logger{36} [%mdc{ShardId:-NONE}] - %msg %n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="${LOGGER:-MAIN}" />
+        <appender-ref ref="CONSOLE" />
+    </root>
+    <logger name="org.apache.http" level="INFO" />
+    <logger name="com.amazonaws.auth" level="INFO" />
+    <logger name="com.amazonaws.request" level="INFO" />
+    <logger name="software.amazon.awssdk" level="INFO" />
+    <logger name="software.amazon.kinesis.common.DiagnosticUtils" level="WARN" />
+    <logger name="software.amazon.kinesis.common.StreamARNUtil" level="DEBUG" />
+    <logger name="software.amazon.kinesis.retrieval" level="DEBUG" />
+    <logger name="software.amazon.kinesis.lifecycle" level="DEBUG" />
+    <logger name="software.amazon.kinesis.retrieval.fanout" level="DEBUG" />
+<!--    <logger name="software.amazon.kinesis.lifecycle.InitializeTask" level="INFO" />-->
+<!--    <logger name="software.amazon.kinesis.retrieval.polling.PrefetchRecordsPublisher" level="INFO" />-->
+<!--    <logger name="software.amazon.kinesis.retrieval.fanout" level="INFO" />-->
+    <logger name="software.amazon.kinesis.metrics.CloudWatchMetricsPublisher" level="ERROR" />
+    <logger name="com.amazonaws.http.apache.utils.ApacheUtils" level="ERROR" />
+    <logger name="io.netty.handler.codec.http2" level="INFO" /> <!-- Switch to DEBUG for H2 frame logging -->
+</configuration>
